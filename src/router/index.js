@@ -16,12 +16,29 @@ const routes = [
     }
   },
   {
+    path: '/articulo',
+    name: 'articulo',
+    component: () => import('../components/articulo'),
+    meta: {
+      administrador: true,
+      almacenista: true
+    }
+  },
+  {
     path: '/categoria',
     name: 'categoria',
     component: () => import('../components/categoria'),
     meta: {
       administrador: true,
       almacenista: true
+    }
+  },
+  {
+    path: '/usuario',
+    name: 'usuario',
+    component: () => import('../components/usuario'),
+    meta: {
+      administrador:true
     }
   },
   {
