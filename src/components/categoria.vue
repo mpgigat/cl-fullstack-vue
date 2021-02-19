@@ -181,8 +181,9 @@ export default {
   methods: {
     listar() {
       let me = this;
+      let header={headers:{"x-token":this.$store.state.token}}
       axios
-        .get("categoria")
+        .get("categoria",header)
         .then(function (response) {
           me.categorias = response.data.categoria;
         })
@@ -221,12 +222,13 @@ export default {
       if (this.validar()) {
         return;
       }
-      if (this.editedIndex > -1) {        
+      if (this.editedIndex > -1) {      
+        let header={headers:{"x-token":this.$store.state.token}}  
         axios
           .put(`categoria/${me._id}`, {
             nombre: me.nombre,
             descripcion: me.descripcion,
-          })
+          },header)
           .then(function () {
             me.limpiar();
             me.close();
@@ -236,12 +238,12 @@ export default {
             console.log(error);
           });
       } else {
-        //CÃ³digo para guardar
+        let header={headers:{"x-token":this.$store.state.token}}  
         axios
           .post("categoria", {
             nombre: this.nombre,
             descripcion: this.descripcion,
-          })
+          },header)
           .then(function (response) {
             me.limpiar();
             me.close();
@@ -276,8 +278,9 @@ export default {
     },
     activar() {
       let me = this;
+      let header={headers:{"x-token":this.$store.state.token}}  
       axios
-        .put(`categoria/activate/${me.adId}`)
+        .put(`categoria/activate/${me.adId}`,{},header)
         .then(function () {
           me.adModal = 0;
           me.adAccion = 0;
@@ -291,9 +294,9 @@ export default {
     },
     desactivar() {
       let me = this;
-      console.log(me._id);
+      let header={headers:{"x-token":this.$store.state.token}}  
       axios
-        .put(`categoria/deactivate/${me.adId}`)
+        .put(`categoria/deactivate/${me.adId}`,{},header)
         .then(function (response) {
           me.adModal = 0;
           me.adAccion = 0;
