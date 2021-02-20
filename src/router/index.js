@@ -25,6 +25,42 @@ const routes = [
     }
   },
   {
+    path: '/cliente',
+    name: 'cliente',
+    component: () => import('../components/cliente'),
+    meta: {
+      administrador: true,
+      vendedor: true
+    }
+  },
+  {
+    path: '/ingreso',
+    name: 'ingreso',
+    component: () => import('../components/ingreso'),
+    meta: {
+      administrador: true,
+      almacenista: true
+    }
+  },
+  {
+    path: '/venta',
+    name: 'venta',
+    component: () => import('../components/venta'),
+    meta: {
+      administrador: true,
+      vendedor: true
+    }
+  },
+  {
+    path: '/proveedor',
+    name: 'proveedor',
+    component: () => import('../components/proveedor'),
+    meta: {
+      administrador: true,
+      almacenista: true
+    }
+  },
+  {
     path: '/categoria',
     name: 'categoria',
     component: () => import('../components/categoria'),

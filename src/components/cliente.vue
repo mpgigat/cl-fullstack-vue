@@ -2,8 +2,7 @@
   <v-layout align-start>
     <v-flex>
       <v-toolbar flat color="white">
-        <v-btn @click="crearPDF()"><v-icon>print</v-icon></v-btn>
-        <v-toolbar-title>Artículos</v-toolbar-title>
+        <v-toolbar-title>Clientes</v-toolbar-title>
         <v-divider class="mx-2" inset vertical></v-divider>
         <v-spacer></v-spacer>
         <v-text-field
@@ -26,33 +25,35 @@
             <v-card-text>
               <v-container grid-list-md>
                 <v-layout wrap>
-                  <v-flex xs12 sm6 md6>
-                    <v-text-field v-model="codigo" label="Código">
-                    </v-text-field>
-                  </v-flex>
-                  <v-flex xs12 sm6 md6>
-                    <v-select
-                      v-model="categoria"
-                      :items="categorias"
-                      label="Categoría"
-                    >
-                    </v-select>
-                  </v-flex>
                   <v-flex xs12 sm12 md12>
                     <v-text-field v-model="nombre" label="Nombre">
                     </v-text-field>
                   </v-flex>
                   <v-flex xs12 sm6 md6>
-                    <v-text-field type="number" v-model="stock" label="Stock">
+                    <v-select
+                      v-model="tipodocumento"
+                      :items="documentos"
+                      label="Tipo Documento"
+                    >
+                    </v-select>
+                  </v-flex>
+                  <v-flex xs12 sm6 md6>
+                    <v-text-field
+                      v-model="numdocumento"
+                      label="Número Documento"
+                    >
                     </v-text-field>
                   </v-flex>
                   <v-flex xs12 sm6 md6>
-                    <v-text-field v-model="precioventa" label="precioventa">
+                    <v-text-field v-model="direccion" label="Dirección">
                     </v-text-field>
                   </v-flex>
-                  <v-flex xs12 sm12 md12>
-                    <v-text-field v-model="descripcion" label="Descripción">
+                  <v-flex xs12 sm6 md6>
+                    <v-text-field v-model="telefono" label="Teléfono">
                     </v-text-field>
+                  </v-flex>
+                  <v-flex xs12 sm6 md6>
+                    <v-text-field v-model="email" label="Email"> </v-text-field>
                   </v-flex>
                   <v-flex xs12 sm12 md12 v-show="valida">
                     <div
@@ -116,7 +117,7 @@
       </v-toolbar>
       <v-data-table
         :headers="headers"
-        :items="articulos"
+        :items="personas"
         :search="search"
         class="elevation-1"
       >
@@ -152,33 +153,33 @@
 </template>
 <script>
 import axios from "axios";
-import jsPDF from "jspdf";
-import autotable from "jspdf-autotable";
 export default {
   data() {
     return {
       dialog: false,
       search: "",
-      articulos: [],
+      personas: [],
       headers: [
         { text: "Opciones", value: "opciones", sortable: false },
-        { text: "Código", value: "codigo", sortable: false },
         { text: "Nombre", value: "nombre", sortable: true },
-        { text: "Categoría", value: "categoria.nombre", sortable: true },
-        { text: "Stock", value: "stock", sortable: false },
-        { text: "Precio Venta", value: "precioventa", sortable: false },
-        { text: "Descripción", value: "descripcion", sortable: false },
+        { text: "Tipo Persona", value: "tipopersona", sortable: true },
+        { text: "Tipo Documento", value: "tipodocumento", sortable: true },
+        { text: "Número Documento", value: "numdocumento", sortable: false },
+        { text: "Dirección", value: "direccion", sortable: false },
+        { text: "Teléfono", value: "telefono", sortable: false },
+        { text: "Email", value: "email", sortable: false },
         { text: "Estado", value: "estado", sortable: false },
       ],
       editedIndex: -1,
       _id: "",
-      categoria: "",
-      categorias: [],
-      codigo: "",
       nombre: "",
-      stock: 0,
-      precioventa: 0,
-      descripcion: "",
+      tipopersona: "Cliente",
+      tipodocumento: "",
+      documentos: ["CC", "NIT", "PASAPORTE", "CE"],
+      numdocumento: "",
+      direccion: "",
+      telefono: "",
+      email: "",
       valida: 0,
       validaMensaje: [],
       adModal: 0,
@@ -199,61 +200,15 @@ export default {
   },
   created() {
     this.listar();
-    this.selectCategoria();
   },
   methods: {
-    crearPDF() {
-      var columns = [
-        { title: "Nombre", dataKey: "nombre" },
-        { title: "Código", dataKey: "codigo" },
-        { title: "Categoría", dataKey: "categoria" },
-        { title: "Stock", dataKey: "stock" },
-        { title: "Precio Venta", dataKey: "precioventa" },
-      ];
-      var rows = [];
-
-      this.articulos.map(function (x) {
-        rows.push({
-          nombre: x.nombre,
-          codigo: x.codigo,
-          categoria: x.categoria.nombre,
-          stock: x.stock,
-          precioventa: x.precioventa,
-        });
-      });
-      var doc = new jsPDF("p", "pt");
-      doc.autoTable(columns, rows, {
-        margin: { top: 60 },
-        addPageContent: function (data) {
-          doc.text("Lista de Artículos", 40, 30);
-        },
-      });
-
-      doc.save("Articulos.pdf");
-    },
-    selectCategoria() {
-      let me = this;
-      let categoriaArray = [];
-      let header = { headers: { "x-token": this.$store.state.token } };
-      axios
-        .get("categoria", header)
-        .then(function (response) {
-          categoriaArray = response.data.categoria;
-          categoriaArray.map(function (x) {
-            me.categorias.push({ text: x.nombre, value: x._id });
-          });
-        })
-        .catch(function (error) {
-          console.log(error);
-        });
-    },
     listar() {
       let me = this;
       let header = { headers: { "x-token": this.$store.state.token } };
       axios
-        .get("articulo", header)
+        .get("persona/clientes", header)
         .then(function (response) {
-          me.articulos = response.data.articulo;
+          me.personas = response.data.persona;
         })
         .catch(function (error) {
           console.log(error);
@@ -262,10 +217,10 @@ export default {
     limpiar() {
       this._id = "";
       this.nombre = "";
-      this.codigo = "";
-      this.stock = 0;
-      this.precioventa = 0;
-      this.descripcion = "";
+      this.numdocumento = "";
+      this.direccion = "";
+      this.telefono = "";
+      this.email = "";
       this.valida = 0;
       this.validaMensaje = [];
       this.editedIndex = -1;
@@ -273,29 +228,30 @@ export default {
     validar() {
       this.valida = 0;
       this.validaMensaje = [];
-      if (!this.categoria) {
-        this.validaMensaje.push("Seleccione una categorÃ­a");
-      }
-      if (this.codigo.length > 64) {
-        this.validaMensaje.push(
-          "El cÃ³digo no debe tener mÃ¡s de 64 caracteres"
-        );
-      }
       if (this.nombre.length < 1 || this.nombre.length > 50) {
         this.validaMensaje.push(
-          "El nombre del artÃ­culo debe tener entre 1-50 caracteres."
+          "El nombre de la persona debe tener entre 1-50 caracteres."
         );
       }
-      if (this.descripcion.length > 255) {
+      if (this.numdocumento.length > 20) {
         this.validaMensaje.push(
-          "La descripciÃ³n del artÃ­culo no debe tener mÃ¡s de 255 caracteres."
+          "El documento no debe tener mÃ¡s de 20 caracteres."
         );
       }
-      if (this.stock < 0) {
-        this.validaMensaje.push("Ingrese un stock valido");
+      if (this.direccion.length > 70) {
+        this.validaMensaje.push(
+          "La direcciÃ³n no debe tener mÃ¡s de 70 caracteres."
+        );
       }
-      if (this.precioventa < 0) {
-        this.validaMensaje.push("Ingrese un precio de venta valido");
+      if (this.telefono.length > 20) {
+        this.validaMensaje.push(
+          "El telÃ©fono no debe tener mÃ¡s de 20 caracteres."
+        );
+      }
+      if (this.nombre.length > 50) {
+        this.validaMensaje.push(
+          "El email del usuario debe tener menos de 50 caracteres."
+        );
       }
       if (this.validaMensaje.length) {
         this.valida = 1;
@@ -311,19 +267,16 @@ export default {
       if (this.editedIndex > -1) {
         //CÃ³digo para editar
         axios
-          .put(
-            `articulo/${me._id}`,
-            {
+          .put(`persona/${me._id}`,{
               _id: this._id,
-              categoria: this.categoria,
-              codigo: this.codigo,
+              tipopersona: this.tipopersona,
               nombre: this.nombre,
-              stock: this.stock,
-              precioventa: this.precioventa,
-              descripcion: this.descripcion,
-            },
-            header
-          )
+              tipodocumento: this.tipodocumento,
+              numdocumento: this.numdocumento,
+              direccion: this.direccion,
+              telefono: this.telefono,
+              email: this.email,
+            },header)
           .then(function (response) {
             me.limpiar();
             me.close();
@@ -335,18 +288,15 @@ export default {
       } else {
         //CÃ³digo para guardar
         axios
-          .post(
-            `articulo`,
-            {
-              categoria: this.categoria,
-              codigo: this.codigo,
+          .post("persona",            {
+              tipopersona: this.tipopersona,
               nombre: this.nombre,
-              stock: this.stock,
-              precioventa: this.precioventa,
-              descripcion: this.descripcion,
-            },
-            header
-          )
+              tipodocumento: this.tipodocumento,
+              numdocumento: this.numdocumento,
+              direccion: this.direccion,
+              telefono: this.telefono,
+              email: this.email,
+            },header)
           .then(function (response) {
             me.limpiar();
             me.close();
@@ -359,12 +309,14 @@ export default {
     },
     editItem(item) {
       this._id = item._id;
-      this.categoria = item.categoria._id;
-      this.codigo = item.codigo;
+      this.rol = item.rol;
       this.nombre = item.nombre;
-      this.stock = item.stock;
-      this.precioventa = item.precioventa;
-      this.descripcion = item.descripcion;
+      this.tipodocumento = item.tipodocumento;
+      this.numdocumento = item.numdocumento;
+      this.direccion = item.direccion;
+      this.telefono = item.telefono;
+      this.email = item.email;
+      this.password = item.password;
       this.dialog = true;
       this.editedIndex = 1;
     },
@@ -387,7 +339,7 @@ export default {
       let me = this;
       let header = { headers: { "x-token": this.$store.state.token } };
       axios
-        .put(`articulo/activate/${me.adId}`, {}, header)
+        .put(`persona/activate/${this.adId}`, { }, header)
         .then(function (response) {
           me.adModal = 0;
           me.adAccion = 0;
@@ -401,9 +353,9 @@ export default {
     },
     desactivar() {
       let me = this;
-      let header = { headers: { "x-token": this.$store.state.token } };
+     let header = { headers: { "x-token": this.$store.state.token } };
       axios
-        .put(`articulo/deactivate/${me.adId}`, {}, header)
+        .put(`persona/deactivate/${this.adId}`, { }, header)
         .then(function (response) {
           me.adModal = 0;
           me.adAccion = 0;
